@@ -19,7 +19,7 @@ class SnowFlurryMode : public RenderMode
 {
 private:
     static const uint8_t SNOW_NUM = 15;
-    static const uint8_t MAX_WINDSPEED = 7;
+    static const uint8_t MAX_WINDSPEED = 3;
     
     unsigned int renderInterval;
     uint8_t newDotChance;
@@ -54,17 +54,20 @@ public:
     }
     
     // 飞雪效果渲染
-    renderSnowFlurry(CRGB pLeds[], uint8_t dir)
+    void renderSnowFlurry(CRGB pLeds[], uint8_t dir)
     {
         const CRGB SNOW_COLOR = CRGB::White;
         CRGB *pLed;
         uint8_t i;
 
-        windspeed += random(3) - 1;
-        if (windspeed > MAX_WINDSPEED)
-            windspeed = MAX_WINDSPEED;
-        else if (windspeed < -MAX_WINDSPEED)
-            windspeed = -MAX_WINDSPEED;
+        if (random(100) < 2)
+        {
+            windspeed += random(3) - 1;
+            if (windspeed > MAX_WINDSPEED)
+                windspeed = MAX_WINDSPEED;
+            else if (windspeed < -MAX_WINDSPEED)
+                windspeed = -MAX_WINDSPEED;
+        }
 
         // 向下移动
         for (i = 0; i < SNOW_NUM; ++i)
@@ -105,7 +108,7 @@ public:
 
     void render() 
     {
-        renderSnowFlurry(pLedsSide, CW0);
+        renderSnowFlurry(pLedsTop, CW0);
     }
 
     void input(uint8_t)

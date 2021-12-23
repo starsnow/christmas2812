@@ -77,9 +77,9 @@ enum Input
 enum RENDER_MODE 
 {
     EMPTY,              // 什么也没有
+    SUN,                // 暖阳
     SNOW,               // 雪
-    WIND_SNOW,          // 风雪
-    SUN                 // 暖阳
+    SNOW_FLURRY         // 风雪
 };
 
 // 坐标点

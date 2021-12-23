@@ -2,7 +2,7 @@
 #include <FastLED.h>
 #include "Cube2812.h"
 
-// #define SOFTSERIAL_DEBUG 1
+#define SOFTSERIAL_DEBUG 1
 
 #ifdef SOFTSERIAL_DEBUG
 #include <SoftwareSerial.h>
@@ -10,7 +10,7 @@
 
 // int mode = 0; // Currently-active animation mode, 0-9
 #ifdef SOFTSERIAL_DEBUG
-// SoftwareSerial debugSerial(12, 13);
+SoftwareSerial debugSerial(12, 13);
 #endif
 
 TuyaWifi my_device;
@@ -20,6 +20,11 @@ unsigned char led_state = 0;
 
 const uint8_t WIFI_RECONNECT_BUTTON_PIN = 3;
 
+
+/******************************************************************************
+                        1:dp数据点序列号重新定义
+          **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
+******************************************************************************/
 //开关(可下发可上报)
 //备注:
 #define DPID_SWITCH_LED 20
@@ -39,24 +44,10 @@ const uint8_t WIFI_RECONNECT_BUTTON_PIN = 3;
 //1111：S (饱和：0-1000, 0X0000-0X03E8）；
 //2222：V (明度：0-1000，0X0000-0X03E8)
 #define DPID_COLOUR_DATA 24
-//场景(可下发可上报)
-//备注:类型：字符;
-//Value: 0011223344445555666677778888;
-//00：情景号;
-//11：单元切换间隔时间（0-100）;
-//22：单元变化时间（0-100）;
-//33：单元变化模式（0静态1跳变2渐变）;
-//4444：H（色度：0-360，0X0000-0X0168）;
-//5555：S (饱和：0-1000, 0X0000-0X03E8);
-//6666：V (明度：0-1000，0X0000-0X03E8);
-//7777：白光亮度（0-1000）;
-//8888：色温值（0-1000）;
-//注：数字1-8的标号对应有多少单元就有多少组
-#define DPID_SCENE_DATA 25
-//倒计时剩余时间(可下发可上报)
+//倒计时(可下发可上报)
 //备注:
 #define DPID_COUNTDOWN 26
-//音乐灯(只下发)
+//音乐律动(只下发)
 //备注:类型：字符串；
 //Value: 011112222333344445555；
 //0：   变化方式，0表示直接输出，1表示渐变；
@@ -66,88 +57,25 @@ const uint8_t WIFI_RECONNECT_BUTTON_PIN = 3;
 //4444：白光亮度（0-1000）；
 //5555：色温值（0-1000）
 #define DPID_MUSIC_DATA 27
-//调节(只下发)
-//备注:类型：字符串 ;
-//Value: 011112222333344445555  ;
-//0：   变化方式，0表示直接输出，1表示渐变;
-//1111：H（色度：0-360，0X0000-0X0168）;
-//2222：S (饱和：0-1000, 0X0000-0X03E8);
-//3333：V (明度：0-1000，0X0000-0X03E8);
-//4444：白光亮度（0-1000）;
-//5555：色温值（0-1000）
-#define DPID_CONTROL_DATA 28
-//入睡(可下发可上报)
-//备注:灯光按设定的时间淡出直至熄灭
-#define DPID_SLEEP_MODE 31
-//唤醒(可下发可上报)
-//备注:灯光按设定的时间逐渐淡入直至设定的亮度
-#define DPID_WAKEUP_MODE 32
-//断电记忆(可下发可上报)
-//备注:通电后，灯亮起的状态
-#define DPID_POWER_MEMORY 33
-//勿扰模式(可下发可上报)
-//备注:适用经常停电区域，开启通电勿扰，通过APP关灯需连续两次上电才会亮灯
-//Value：ABCCDDEEFFGG
-//A：版本，初始版本0x00；
-//B：模式，0x00初始默认值、0x01恢复记忆值、0x02用户定制；
-//CC：色相 H，0~360；
-//DD：饱和度 S，0~1000；
-//EE：明度 V，0~1000；
-//FF：亮度，0~1000；
-//GG：色温，0~1000；
-#define DPID_DO_NOT_DISTURB 34
-//麦克风音乐律动(可下发可上报)
-//备注:类型：  字符串
-//Value：  AABBCCDDEEFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMNNNN
-//AA  版本
-//BB  0-关闭，1-打开
-//CC  模式编号，自定义从201开始
-//DD  变换方式：0 - 呼吸模式，1 -跳变模式 ， 2 - 经典模式
-//EE  变化速度
-//FF  灵敏度
-//GGGG  颜色1-色相饱和度
-//HHHH  颜色2-色相饱和度
-//......
-//NNNN  颜色8-色相饱和度
-#define DPID_MIC_MUSIC_DATA 42
-//炫彩情景(可下发可上报)
+//灯带长度(只上报)
+//备注:幻彩灯带在UI面板上展示的总长度
+#define DPID_LIGHT_LENGTH 46
+//灯带点数(只上报)
+//备注:幻彩灯带驱动芯片总数
+#define DPID_LIGHT_PIXEL 47
+//幻彩情景(可下发可上报)
 //备注:专门用于幻彩灯带场景
-//Value：ABCDEFGHIJJKLLM...
-//A：版本号；
-//B：情景模式编号；
-//C：变化方式（0-静态、1-渐变、2跳变、3呼吸、4-闪烁、10-流水、11-彩虹）
-//D：单元切换间隔时间（0-100）;
-//E：单元变化时间（0-100）；
-//FGH：设置项；
-//I：亮度（亮度V：0~100）；
-//JJ：颜色1（色度H：0-360）；
-//K：饱和度1 (饱和度S：0-100)；
-//LL：颜色2（色度H：0-360）；
-//M：饱和度2（饱和度S：0~100）；
-//注：有多少个颜色单元就有多少组，最多支持20组；
-//每个字母代表一个字节
 #define DPID_DREAMLIGHT_SCENE_MODE 51
-//炫彩本地音乐律动(可下发可上报)
-//备注:专门用于幻彩灯带本地音乐
-//Value：ABCDEFGHIJKKLMMN...
-//A：版本号；
-//B：本地麦克风开关（0-关、1-开）；
-//C：音乐模式编号；
-//D：变化方式；
-//E：变化速度（1-100）;
-//F：灵敏度(1-100)；
-//GHI：设置项；
-//J：亮度（亮度V：0~100）；
-//KK：颜色1（色度H：0-360）；
-//L：饱和度1 (饱和度S：0-100)；
-//MM：颜色2（色度H：0-360）；
-//N：饱和度2（饱和度S：0~100）；
-//注：有多少个颜色单元就有多少组，最多支持8组；
-//每个字母代表一个字节
+//幻彩本地音乐律动(可下发可上报)
+//备注:专门用于幻彩灯带本地音乐律动
 #define DPID_DREAMLIGHTMIC_MUSIC_DATA 52
 //点数/长度设置(可下发可上报)
-//备注:幻彩灯带裁剪之后重新设置长度
+//备注:幻彩灯带裁剪之后，对长度重新进行设置
 #define DPID_LIGHTPIXEL_NUMBER_SET 53
+//涂抹调色(可下发可上报)
+//备注:专门用于幻彩灯带的调光调色
+#define DPID_PAINT_COLOUR_DATA 61
+
 
 ///* Current device DP values */
 unsigned char dp_bool_value = 0;
@@ -165,27 +93,28 @@ unsigned char hex[10] = {"0"};
 /* Stores all DPs and their types. PS: array[][0]:dpid, array[][1]:dp type. 
  *                                     dp type(TuyaDefs.h) : DP_TYPE_RAW, DP_TYPE_BOOL, DP_TYPE_VALUE, DP_TYPE_STRING, DP_TYPE_ENUM, DP_TYPE_BITMAP
 */
-unsigned char dp_array[][2] = {
-    {DPID_SWITCH_LED, DP_TYPE_BOOL},
-    {DPID_WORK_MODE, DP_TYPE_ENUM},
-    {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
-    {DPID_TEMP_VALUE, DP_TYPE_VALUE},
-    {DPID_COLOUR_DATA, DP_TYPE_STRING},
-    {DPID_SCENE_DATA, DP_TYPE_STRING},
-    {DPID_COUNTDOWN, DP_TYPE_VALUE},
-    {DPID_MUSIC_DATA, DP_TYPE_STRING},
-    {DPID_CONTROL_DATA, DP_TYPE_STRING},
-    {DPID_SLEEP_MODE, DP_TYPE_RAW},
-    {DPID_WAKEUP_MODE, DP_TYPE_RAW},
-    {DPID_POWER_MEMORY, DP_TYPE_RAW},
-    {DPID_DO_NOT_DISTURB, DP_TYPE_BOOL},
-    {DPID_MIC_MUSIC_DATA, DP_TYPE_STRING},
-    {DPID_DREAMLIGHT_SCENE_MODE, DP_TYPE_RAW},
-    {DPID_DREAMLIGHTMIC_MUSIC_DATA, DP_TYPE_RAW},
-    {DPID_LIGHTPIXEL_NUMBER_SET, DP_TYPE_VALUE},
+/******************************************************************************
+                        1:dp数据点序列类型对照表
+          **此为自动生成代码,如在开发平台有相关修改请重新下载MCU_SDK**         
+******************************************************************************/
+unsigned char dp_array[][2] =
+{
+  {DPID_SWITCH_LED, DP_TYPE_BOOL},
+  {DPID_WORK_MODE, DP_TYPE_ENUM},
+  {DPID_BRIGHT_VALUE, DP_TYPE_VALUE},
+  {DPID_TEMP_VALUE, DP_TYPE_VALUE},
+  {DPID_COLOUR_DATA, DP_TYPE_STRING},
+  {DPID_COUNTDOWN, DP_TYPE_VALUE},
+  {DPID_MUSIC_DATA, DP_TYPE_STRING},
+  {DPID_LIGHT_LENGTH, DP_TYPE_VALUE},
+  {DPID_LIGHT_PIXEL, DP_TYPE_VALUE},
+  {DPID_DREAMLIGHT_SCENE_MODE, DP_TYPE_RAW},
+  {DPID_DREAMLIGHTMIC_MUSIC_DATA, DP_TYPE_RAW},
+  {DPID_LIGHTPIXEL_NUMBER_SET, DP_TYPE_VALUE},
+  {DPID_PAINT_COLOUR_DATA, DP_TYPE_RAW},
 };
 
-unsigned char pid[] = {"vhj6p7rzvoemihhx"}; //*********处替换成涂鸦IoT平台自己创建的产品的PID
+unsigned char pid[] = {"v9pudsuphqwpqbqa"}; //*********处替换成涂鸦IoT平台自己创建的产品的PID
 unsigned char mcu_ver[] = {"1.0.0"};
 
 void setup()
@@ -213,6 +142,7 @@ void setup()
     my_device.dp_update_all_func_register(dp_update_all);
 
     initCube2812();
+    // setRenderMode(SNOW_FLURRY);
 }
 
 void loop()
@@ -318,32 +248,32 @@ unsigned char dp_process(unsigned char dpid, const unsigned char value[], unsign
         my_device.mcu_dp_update(dpid, value, length);
         break;
 
-    case DPID_SCENE_DATA:
-        my_device.mcu_dp_update(DPID_SCENE_DATA, value, length);
-        scene_mode = value[1];
+    // case DPID_SCENE_DATA:
+    //     my_device.mcu_dp_update(DPID_SCENE_DATA, value, length);
+    //     scene_mode = value[1];
 
-        switch (scene_mode)
-        {
-        case 0:
-            break;
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 4:
-            break;
-        case 5:
-            break;
-        case 6:
-            break;
-        case 7:
-            break;
-        case 8:
-            break;
-        }
-        break;
+    //     switch (scene_mode)
+    //     {
+    //     case 0:
+    //         break;
+    //     case 1:
+    //         break;
+    //     case 2:
+    //         break;
+    //     case 3:
+    //         break;
+    //     case 4:
+    //         break;
+    //     case 5:
+    //         break;
+    //     case 6:
+    //         break;
+    //     case 7:
+    //         break;
+    //     case 8:
+    //         break;
+    //     }
+    //     break;
 
     case DPID_DREAMLIGHT_SCENE_MODE: //炫彩情景
         my_device.mcu_dp_update(DPID_DREAMLIGHT_SCENE_MODE, value, length);
@@ -355,13 +285,10 @@ unsigned char dp_process(unsigned char dpid, const unsigned char value[], unsign
         switch (scene_mode)
         {
         case 0:
-            setRenderMode(COLOURFUL_DREAM);
             break;
         case 1:
-            setRenderMode(RAINBOW);
             break;
         case 2:
-            setRenderMode(SNOW);
             break;
         case 3:
             break;
@@ -376,15 +303,15 @@ unsigned char dp_process(unsigned char dpid, const unsigned char value[], unsign
         case 8:
             break;
 
-        // case 200: // 自定义的第一个
-        //     setRenderMode(RAINBOW);
-        //     break;
-        // case 201: // 自定义的第一个
-        //     setRenderMode(COLOURFUL_DREAM);
-        //     break;
-        // case 202: // 自定义的第一个
-        //     setRenderMode(STAR_SKY);
-        //     break;
+        case 201: // 自定义的第一个
+            setRenderMode(SUN);
+            break;
+        case 202: // 自定义的第一个
+            setRenderMode(SNOW);
+            break;
+        case 203: // 自定义的第一个
+            setRenderMode(SNOW_FLURRY);
+            break;
         // case 203: // 自定义的第一个
         //     setRenderMode(HACKER_MATRIX);
         //     break;
@@ -395,7 +322,7 @@ unsigned char dp_process(unsigned char dpid, const unsigned char value[], unsign
         //     setRenderMode(BUBBLE);
         //     break;
         // case 206: // 自定义的第一个
-        //     setRenderMode(SNOW);
+        //     setRenderMode(RAINBOW);
         //     break;
         // case 207: // 自定义的第一个
         //     setRenderMode(ENERGY_CUBE);
@@ -405,30 +332,30 @@ unsigned char dp_process(unsigned char dpid, const unsigned char value[], unsign
         //     break;
 
         // APP 只能定义 8 个自定义场景，所以贪吃蛇另外做一个
-        case 200: // 自定义的第一个
-            setRenderMode(ENERGY_CUBE);
-            break;
-        case 201: // 自定义的第一个
-            setRenderMode(SNAKE_GAME);
-            break;
-        case 202: // 上
-            inputDir(UP);
-            break;
-        case 203: // 右
-            inputDir(RIGHT);
-            break;
-        case 204: // 左
-            inputDir(LEFT);
-            break;
-        case 205: // 下
-            inputDir(DOWN);
-            break;
-        case 206: // 自定义的第一个
-            setRenderMode(COLOURFUL_DREAM);
-            break;
-        case 207: // 自定义的第一个
-            setRenderMode(STAR_SKY);
-            break;
+        // case 200: // 自定义的第一个
+        //     setRenderMode(ENERGY_CUBE);
+        //     break;
+        // case 201: // 自定义的第一个
+        //     setRenderMode(SNAKE_GAME);
+        //     break;
+        // case 202: // 上
+        //     inputDir(UP);
+        //     break;
+        // case 203: // 右
+        //     inputDir(RIGHT);
+        //     break;
+        // case 204: // 左
+        //     inputDir(LEFT);
+        //     break;
+        // case 205: // 下
+        //     inputDir(DOWN);
+        //     break;
+        // case 206: // 自定义的第一个
+        //     setRenderMode(COLOURFUL_DREAM);
+        //     break;
+        // case 207: // 自定义的第一个
+        //     setRenderMode(STAR_SKY);
+        //     break;
 
         }
 

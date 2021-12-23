@@ -5,6 +5,8 @@
 #include <arduino.h>
 #include "Cube2812.h"
 #include "snowMode.h"
+#include "sunMode.h"
+#include "snowFlurryMode.h"
 
 // FastLED 的 LED 数据
 // 内存不够用，只用三个面
@@ -46,7 +48,7 @@ void initCube2812()
     // setRenderMode(ENERGY_CUBE);
     // setRenderMode(SNOW);
     // setRenderMode(SNAKE_GAME);
-    // setRenderMode(EMPTY);
+    setRenderMode(EMPTY);
 }
 
 // 渲染刷新函数
@@ -61,7 +63,7 @@ void updateCube2812()
         if (renderMode == 0)
             return;
 
-Serial.println("xxx");
+// Serial.println("xxx");
         renderMode->input(random8(4) +1);
         // inputDir(random8(4) +1)
         renderIntervalMs = renderMode->getRenderInterval();
@@ -88,6 +90,14 @@ void setRenderMode(enum RENDER_MODE mode)
     {
         case SNOW:               // 雪
             newMode = new SnowMode();
+            break;
+
+        case SUN:               // 阳光
+            newMode = new SunMode();
+            break;
+
+        case SNOW_FLURRY:               // 飘雪
+            newMode = new SnowFlurryMode();
             break;
 
         case EMPTY:

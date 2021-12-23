@@ -29,7 +29,7 @@ private:
 public:
     SnowMode()
     {
-        renderInterval = 100;
+        renderInterval = 200;
         newDotChance = 20;
         brightnessDelta = 30;
     }
@@ -51,7 +51,7 @@ public:
     }
     
     // 飘雪效果渲染
-    renderSnow(CRGB pLeds[], uint8_t dir)
+    void renderSnow(CRGB pLeds[], uint8_t dir)
     {
         const CRGB SNOW_COLOR = CRGB::White;
         CRGB *pLed;
@@ -92,7 +92,7 @@ public:
 
     void render() 
     {
-        renderSnow(pLedsSide, CW0);
+        renderSnow(pLedsTop, CW0);
     }
 
     void input(uint8_t)

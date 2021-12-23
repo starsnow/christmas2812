@@ -18,15 +18,20 @@ extern CLEDController* FastLEDControllers[MATRIX_NUM];
 class SunMode : public RenderMode
 {
 private:
+    const CRGB SUN_COLOR = CRGB::OrangeRed;
+    const static uint8_t MAX_BRIGHTNESS = 40;
+    const static uint8_t MIN_BRIGHTNESS = 10;
     unsigned int renderInterval;
     uint8_t brightnessDelta;
+    uint8_t currentBrightness;
     CRGB *pLedsTop;
 
 public:
     SunMode()
     {
         renderInterval = 100;
-        brightnessDelta = 30;
+        brightnessDelta = 1;
+        currentBrightness = 0;
     }
 
     String getName() 
@@ -43,21 +48,27 @@ public:
     {
         FastLEDControllers[UP_SIDE]->setLeds(leds[UP_SIDE], NUM_LEDS_PER_MATRIX);
         pLedsTop    = leds[UP_SIDE];
+
+        fill_solid(pLedsTop, NUM_LEDS_PER_MATRIX, SUN_COLOR);
     }
     
     // 暖阳效果渲染
     // 微调明亮度就好了
-    renderSun(CRGB pLeds[], uint8_t dir)
+    void renderSun(CRGB pLeds[], uint8_t dir)
     {
-        const CRGB SUN_COLOR = CRGB::Oringe;
-        CRGB *pLed;
-        uint8_t i;
+        if (currentBrightness >= MAX_BRIGHTNESS)
+            brightnessDelta = -1;
 
+        if (currentBrightness <= MIN_BRIGHTNESS)
+            brightnessDelta = 1;    
+
+        currentBrightness += brightnessDelta;
+        FastLED.setBrightness(currentBrightness);
     }
 
     void render() 
     {
-        renderSun(pLedsSide, CW0);
+        renderSun(pLedsTop, CW0);
     }
 
     void input(uint8_t)
